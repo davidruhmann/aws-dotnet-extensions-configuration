@@ -15,6 +15,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Amazon.Extensions.Configuration.SystemsManager.Internal;
 using Amazon.SimpleSystemsManagement.Model;
@@ -30,21 +31,28 @@ namespace Amazon.Extensions.Configuration.SystemsManager
     {
         public override IDictionary<string, string> ProcessParameters(IEnumerable<Parameter> parameters, string path)
         {
-            var outputDictionary = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            foreach (Parameter parameter in parameters.Where(parameter => IncludeParameter(parameter, path)))
+            try
             {
-                // Get the extra prefix if the path is subset of paramater name.
-                string prefix = GetKey(parameter, path);
-
-                var parameterDictionary = JsonConfigurationParser.Parse(parameter.Value);
-                foreach (var keyValue in parameterDictionary)
+                var outputDictionary = new Dictionary<string, string>(StringComparer.InvariantCulture);
+                foreach (Parameter parameter in parameters.Where(parameter => IncludeParameter(parameter, path)))
                 {
-                    string key = (!string.IsNullOrEmpty(prefix) ? ConfigurationPath.Combine(prefix, keyValue.Key) : keyValue.Key);
-                    outputDictionary.Add(key, keyValue.Value);
-                }
-            }
+                    // Get the extra prefix if the path is subset of parameter name.
+                    string prefix = GetKey(parameter, path);
 
-            return outputDictionary;
+                    var parameterDictionary = JsonConfigurationParser.Parse(parameter.Value);
+                    foreach (var keyValue in parameterDictionary)
+                    {
+                        string key = (!string.IsNullOrEmpty(prefix) ? ConfigurationPath.Combine(prefix, keyValue.Key) : keyValue.Key);
+                        outputDictionary.Add(key, keyValue.Value);
+                    }
+                }
+
+                return outputDictionary;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidDataException($"Failed to load JSON parameter from {path}.", ex);
+            }
         }
     }
 }

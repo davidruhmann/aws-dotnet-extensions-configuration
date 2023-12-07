@@ -86,13 +86,13 @@ namespace Amazon.Extensions.Configuration.SystemsManager.Internal
             }
         }
 
-        public static bool IsSecretsManagerPath(string path) => path.StartsWith(SecretsManagerPath, StringComparison.OrdinalIgnoreCase);
+        public static bool IsSecretsManagerPath(string path) => path.StartsWith(SecretsManagerPath, StringComparison.InvariantCulture);
 
         public static IDictionary<string, string> AddPrefix(IDictionary<string, string> input, string prefix)
         {
             return string.IsNullOrEmpty(prefix)
                 ? input
-                : input.ToDictionary(pair => $"{prefix}{ConfigurationPath.KeyDelimiter}{pair.Key}", pair => pair.Value, StringComparer.OrdinalIgnoreCase);
+                : input.ToDictionary(pair => $"{prefix}{ConfigurationPath.KeyDelimiter}{pair.Key}", pair => pair.Value, StringComparer.InvariantCulture);
 
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using Amazon.SimpleSystemsManagement.Model;
 using Xunit;
 
@@ -25,7 +26,9 @@ namespace Amazon.Extensions.Configuration.SystemsManager.Tests
                 new Parameter {Name = "/p6", Value = "{\"p6key\": { \"p7key\": { \"p8key\": \"p8value\" } } }"},
                 new Parameter {Name = "/ObjectA", Value = "{\"Bucket\": \"arnA\"}"},
                 new Parameter {Name = "/ObjectB", Value = "{\"Bucket\": \"arnB\"}"},
-                new Parameter {Name = "/", Value = "{\"testParam\": \"testValue\"}"}
+                new Parameter {Name = "/", Value = "{\"testParam\": \"testValue\"}"},
+                new Parameter {Name = "/dup", Value = "{\"testParam\": \"testValue1\"}"},
+                new Parameter {Name = "/DUP", Value = "{\"testParam\": \"testValue1\", \"TestParam\": \"testValue2\"}"},
             };
             var expected = new Dictionary<string, string>() {
                 { "p1:p1", "p1" },
@@ -35,7 +38,10 @@ namespace Amazon.Extensions.Configuration.SystemsManager.Tests
                 { "p6:p6key:p7key:p8key", "p8value" },
                 { "ObjectA:Bucket", "arnA" },
                 { "ObjectB:Bucket", "arnB" },
-                { "testParam", "testValue" }
+                { "testParam", "testValue" },
+                { "dup:testParam", "testValue1" },
+                { "DUP:testParam", "testValue1" },
+                { "DUP:TestParam", "testValue2" },
             };
 
             const string path = "/";
@@ -43,6 +49,31 @@ namespace Amazon.Extensions.Configuration.SystemsManager.Tests
             var data = _parameterProcessor.ProcessParameters(parameters, path);
 
             Assert.All(expected, item => Assert.Equal(item.Value, data[item.Key]));
+        }
+
+        [Fact]
+        public void ProcessParametersDuplicateKeyTest()
+        {
+            var parameters = new List<Parameter>
+            {
+                new Parameter {Name = "/dup", Value = "{\"testParam\": \"testValue1\"}"},
+                new Parameter {Name = "/dup", Value = "{\"testParam\": \"testValue1\", \"TestParam\": \"testValue2\"}"},
+            };
+            const string path = "/";
+
+            Assert.Throws<InvalidDataException>(() => _parameterProcessor.ProcessParameters(parameters, path));
+        }
+
+        [Fact]
+        public void ProcessParametersDuplicateJSONTest()
+        {
+            var parameters = new List<Parameter>
+            {
+                new Parameter {Name = "/dup", Value = "{\"testParam\": \"testValue1\", \"testParam\": \"testValue2\"}"},
+            };
+            const string path = "/";
+
+            Assert.Throws<InvalidDataException>(() => _parameterProcessor.ProcessParameters(parameters, path));
         }
     }
 }

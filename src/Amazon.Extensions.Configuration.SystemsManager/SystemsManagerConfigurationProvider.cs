@@ -15,6 +15,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.Extensions.Configuration.SystemsManager.AppConfig;
@@ -122,7 +123,7 @@ namespace Amazon.Extensions.Configuration.SystemsManager
             }
             catch (Exception ex)
             {
-                if (Source.Optional) return;
+                if (Source.Optional && !(ex is InvalidDataException)) return;
 
                 var ignoreException = reload;
                 if (Source.OnLoadException != null)

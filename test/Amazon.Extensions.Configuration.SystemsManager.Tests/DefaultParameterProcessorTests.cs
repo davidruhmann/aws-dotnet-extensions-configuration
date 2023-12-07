@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using Amazon.SimpleSystemsManagement;
 using Amazon.SimpleSystemsManagement.Model;
 using Moq;
@@ -24,6 +25,8 @@ namespace Amazon.Extensions.Configuration.SystemsManager.Tests
                 new Parameter {Name = "/start/path/p1/p2-2", Value = "p1:p2-2"},
                 new Parameter {Name = "/start/path/p1/p2/p3-1", Value = "p1:p2:p3-1"},
                 new Parameter {Name = "/start/path/p1/p2/p3-2", Value = "p1:p2:p3-2"},
+                new Parameter {Name = "/start/path/dup/a", Value = "dup:a"},
+                new Parameter {Name = "/start/path/DUP/A", Value = "DUP:A"},
             };
 
             const string path = "/start/path";
@@ -70,6 +73,20 @@ namespace Amazon.Extensions.Configuration.SystemsManager.Tests
             var data = _parameterProcessor.ProcessParameters(parameters, path);
 
             Assert.All(data, item => Assert.Equal(item.Value, item.Key));
+        }
+
+        [Fact]
+        public void ProcessParametersDuplicateKeyTest()
+        {
+            var parameters = new List<Parameter>
+            {
+                new Parameter {Name = "/start/path/dup/a", Value = "dup:a"},
+                new Parameter {Name = "/start/path/dup/a", Value = "dup:a"},
+            };
+
+            const string path = "/start/path";
+
+            Assert.Throws<InvalidDataException>(() => _parameterProcessor.ProcessParameters(parameters, path));
         }
     }
 }

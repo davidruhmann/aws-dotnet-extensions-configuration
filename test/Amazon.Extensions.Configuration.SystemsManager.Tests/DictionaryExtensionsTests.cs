@@ -23,7 +23,8 @@ namespace Amazon.Extensions.Configuration.SystemsManager.Tests
             {new Dictionary<string, string> {{"a", "a"}}, new Dictionary<string, string> {{"b", "b"}}, false},
             {new Dictionary<string, string> {{"a", "a"}}, new Dictionary<string, string> {{"a", "b"}}, false},
             {new Dictionary<string, string> {{"a", "a"}}, new Dictionary<string, string> {{"b", "a"}}, false},
-            {new Dictionary<string, string> {{"a", "a"},{"b", "b"}}, new Dictionary<string, string> {{"b", "b"},{"a", "a"}}, true}
+            {new Dictionary<string, string> {{"a", "a"},{"b", "b"}}, new Dictionary<string, string> {{"b", "b"},{"a", "a"}}, true},
+            {new Dictionary<string, string> {{"a", "a"},{"b", "b"},{"A", "A"},{"B", "B"}}, new Dictionary<string, string> {{"B", "B"},{"A", "A"},{"b", "b"},{"a", "a"}}, true},
         };
     }
 }
