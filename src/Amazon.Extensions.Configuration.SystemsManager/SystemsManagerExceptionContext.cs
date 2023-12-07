@@ -26,7 +26,7 @@ namespace Amazon.Extensions.Configuration.SystemsManager
         /// </summary>
         public IConfigurationProvider Provider { get; set; }
 
-        /// <summary>The exception that occured in Load.</summary>
+        /// <summary>The exception that occurred in Load.</summary>
         public Exception Exception { get; set; }
 
         /// <summary>If true, the exception will not be rethrown.</summary>

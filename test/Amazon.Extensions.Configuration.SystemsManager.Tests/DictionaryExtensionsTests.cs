@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Amazon.Extensions.Configuration.SystemsManager.Internal;
 using Xunit;
 
@@ -23,7 +24,8 @@ namespace Amazon.Extensions.Configuration.SystemsManager.Tests
             {new Dictionary<string, string> {{"a", "a"}}, new Dictionary<string, string> {{"b", "b"}}, false},
             {new Dictionary<string, string> {{"a", "a"}}, new Dictionary<string, string> {{"a", "b"}}, false},
             {new Dictionary<string, string> {{"a", "a"}}, new Dictionary<string, string> {{"b", "a"}}, false},
-            {new Dictionary<string, string> {{"a", "a"},{"b", "b"}}, new Dictionary<string, string> {{"b", "b"},{"a", "a"}}, true}
+            {new Dictionary<string, string> {{"a", "a"},{"b", "b"}}, new Dictionary<string, string> {{"b", "b"},{"a", "a"}}, true},
+            {new Dictionary<string, string> {{"a", "a"},{"b", "b"}}, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {{"B", "b"},{"A", "a"}}, true},
         };
     }
 }

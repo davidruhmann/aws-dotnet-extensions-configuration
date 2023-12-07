@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using Amazon.SimpleSystemsManagement.Model;
 using Xunit;
 
@@ -43,6 +44,51 @@ namespace Amazon.Extensions.Configuration.SystemsManager.Tests
             var data = _parameterProcessor.ProcessParameters(parameters, path);
 
             Assert.All(expected, item => Assert.Equal(item.Value, data[item.Key]));
+        }
+
+        [Fact]
+        public void ProcessParametersMergeTest()
+        {
+            var parameters = new List<Parameter>
+            {
+                new Parameter {Name = "/dup", Value = "{\"testParam1\": \"testValue\"}"},
+                new Parameter {Name = "/DUP", Value = "{\"testParam2\": \"testValue\"}"},
+            };
+            var expected = new Dictionary<string, string>() {
+                { "dup:testParam1", "testValue" },
+                { "DUP:testParam2", "testValue" },
+            };
+
+            const string path = "/";
+
+            var data = _parameterProcessor.ProcessParameters(parameters, path);
+
+            Assert.All(expected, item => Assert.Equal(item.Value, data[item.Key]));
+        }
+
+        [Fact]
+        public void ProcessParametersDuplicateKeyTest()
+        {
+            var parameters = new List<Parameter>
+            {
+                new Parameter {Name = "/dup", Value = "{\"testParam\": \"testValue\"}"},
+                new Parameter {Name = "/DUP", Value = "{\"testParam\": \"testValue\"}"},
+            };
+            const string path = "/";
+
+            Assert.Throws<InvalidDataException>(() => _parameterProcessor.ProcessParameters(parameters, path));
+        }
+
+        [Fact]
+        public void ProcessParametersDuplicateJsonKeyTest()
+        {
+            var parameters = new List<Parameter>
+            {
+                new Parameter {Name = "/dup", Value = "{\"testParam\": \"testValue1\", \"TestParam\": \"testValue2\"}"},
+            };
+            const string path = "/";
+
+            Assert.Throws<InvalidDataException>(() => _parameterProcessor.ProcessParameters(parameters, path));
         }
     }
 }

@@ -26,6 +26,7 @@ namespace Amazon.Extensions.Configuration.SystemsManager
     {
         /// <summary>
         /// Determines if loading configuration data from AWS Systems Manager Parameter Store is optional.
+        /// Exceptions due to invalid configuration data will still throw when Optional is true.
         /// </summary>
         bool Optional { get; set; }
 

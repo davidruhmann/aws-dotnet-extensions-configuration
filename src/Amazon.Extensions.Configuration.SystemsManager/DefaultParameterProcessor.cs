@@ -15,6 +15,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Amazon.SimpleSystemsManagement;
 using Amazon.SimpleSystemsManagement.Model;
@@ -55,21 +56,27 @@ namespace Amazon.Extensions.Configuration.SystemsManager
 
         public virtual IDictionary<string, string> ProcessParameters(IEnumerable<Parameter> parameters, string path)
         {
-            var result = new List<KeyValuePair<string, string>>();
-            foreach (var parameter in parameters.Where(parameter => IncludeParameter(parameter, path)))
+            try
             {
-                if (parameter.Type == ParameterType.StringList)
+                var result = new List<KeyValuePair<string, string>>();
+                foreach (var parameter in parameters.Where(parameter => IncludeParameter(parameter, path)))
                 {
-                    result.AddRange(ParseStringList(parameter, path));
+                    if (parameter.Type == ParameterType.StringList)
+                    {
+                        result.AddRange(ParseStringList(parameter, path));
+                    }
+                    else
+                    {
+                        result.Add(new KeyValuePair<string, string>(GetKey(parameter, path), GetValue(parameter, path)));
+                    }
                 }
-                else
-                {
-                    result.Add(new KeyValuePair<string, string>(GetKey(parameter, path), GetValue(parameter, path)));
-                }
-            }
 
-            return result.ToDictionary(parameter => parameter.Key, parameter => parameter.Value,
-                StringComparer.OrdinalIgnoreCase);
+                return result.ToDictionary(parameter => parameter.Key, parameter => parameter.Value, StringComparer.OrdinalIgnoreCase);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidDataException($"Failed to parse parameters from {path}.", ex);
+            }
         }
     }
 }
